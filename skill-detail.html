@@ -88,7 +88,7 @@
       <ul>
         <li>断网跑 Layer 1：按关键词把任务匹配到本地已装 skill，零 token、毫秒级</li>
         <li>本地没命中跑 Layer 2：去 GitHub 搜对口 skill 仓库，列带 star / 描述的候选</li>
-        <li>你点名"审计"时跑 Layer 3：派 2–4 个 agent 分头做、再交叉核对</li>
+        <li>你点名"审计"时跑 Layer 3：派 2–4 个 agent 分头做、再交叉核对（宿主禁嵌套 agent 时主 agent 分视角自审，交付一致）</li>
       </ul>
     </div>
     <div class="card">
@@ -126,7 +126,7 @@
   </div>
 
   <div class="sec-title">三层工作流（按需触发）</div>
-  <div class="sec-sub">永远先跑 Layer 1，没命中才上 GitHub，你点名"审计"才派 Agent。</div>
+  <div class="sec-sub">永远先跑 Layer 1，没命中才上 GitHub，你点名"审计"才审计——能派 Agent 就并行派，派不动时主 Agent 自动分视角自审。</div>
   <div class="flow">       你描述任务
             │
             ▼
@@ -146,14 +146,14 @@
              │
        你挑一个 ──► 安装 / 调用（完）
              │
-       要审计？├── 是 ──► Layer 3：派 2–4 个 agent 分头做 + 互审
+       要审计？├── 是 ──► Layer 3：多 Agent 协审（或主 Agent 自审）
              │
             否
              ▼
            结束</div>
 
   <div class="sec-title">项目示意图</div>
-  <div class="sec-sub">三层按需触发：本地路由先跑，没命中才上 GitHub，你点名"审计"才派 Agent。</div>
+  <div class="sec-sub">三层按需触发：本地路由先跑，没命中才上 GitHub，你点名"审计"才审计（宿主不支持并行 Agent 时主 Agent 分视角自审）。</div>
   <div style="margin-top:20px;background:#0d1117;border:1px solid #30363d;border-radius:16px;padding:18px 10px">
     <svg viewBox="0 0 680 500" width="100%" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="技能罗盘三层工作流示意图">
       <defs>
@@ -186,7 +186,7 @@
       <g>
         <rect x="455" y="310" width="190" height="60" rx="10" fill="#161b22" stroke="#d29922" stroke-width="1"/>
         <text x="550" y="330" text-anchor="middle" dominant-baseline="central" fill="#e6edf3" font-family="sans-serif" font-size="14" font-weight="500">Layer 3 · 多Agent 协审</text>
-        <text x="550" y="352" text-anchor="middle" dominant-baseline="central" fill="#8b949e" font-family="sans-serif" font-size="12">派 2–4 agent 分头 + 互审</text>
+        <text x="550" y="352" text-anchor="middle" dominant-baseline="central" fill="#8b949e" font-family="sans-serif" font-size="12">并行 agent 或 主 agent 自审</text>
       </g>
       <g>
         <rect x="240" y="420" width="200" height="44" rx="10" fill="#161b22" stroke="#3fb950" stroke-width="1"/>
@@ -214,9 +214,10 @@
   <div class="sec-sub">助理读取 description 后自动匹配，用户说下面任一即可唤醒。</div>
   <div>
     <span class="tag">找skill</span><span class="tag">有没有现成轮子</span>
+    <span class="tag">别重复造轮子</span><span class="tag">省token</span>
     <span class="tag">任务编排</span><span class="tag">多agent</span>
     <span class="tag">并行审计</span><span class="tag">代码审计</span>
-    <span class="tag">避免遗漏</span>
+    <span class="tag">审计一下</span><span class="tag">避免遗漏</span>
   </div>
 
   <div class="sec-title">示例</div>
@@ -227,11 +228,11 @@
   <div class="sec-title">目录结构</div>
   <table>
     <tr><th>文件</th><th>作用</th></tr>
-    <tr><td><code>SKILL.md</code></td><td>本详情页来源：触发词、三层流程、Agent 指令</td></tr>
+    <tr><td><code>SKILL.md</code></td><td>技能元数据：触发词、三层流程、Agent 指令（本详情页即由它生成）</td></tr>
     <tr><td><code>route_local.py</code></td><td>Layer 1 本地路由（CJK 2/3-gram + 拉丁标识符匹配）</td></tr>
     <tr><td><code>gh.py</code></td><td>Layer 2 GitHub 兜底搜索（纯 urllib，优雅降级）</td></tr>
     <tr><td><code>tests/test_all.py</code></td><td>9/9 单元测试（覆盖扫描 / 打分 / 离线降级）</td></tr>
-    <tr><td><code>legacy/</code></td><td>旧 1.x CDP 注入 daemon 实现（已归档，未删）</td></tr>
+    <tr><td><code>legacy/</code></td><td>旧 1.x CDP 注入 daemon 实现（仅本地归档，发布仓库不含）</td></tr>
   </table>
 
   <div class="sec-title">模块关系图</div>
