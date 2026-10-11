@@ -1,6 +1,6 @@
 # 技能罗盘
 
-> 一个「skill 路由器 + 多 Agent 审计员」。**核心理念：有现成的轮子，就别从零造**——遇到任务先找现成 skill 复用，同样的活儿别人早干过，直接调用最省时、最省 token；你描述任务，它告诉你用哪个 skill，本地没有就上 GitHub 搜候选；你说"审计一下"，再派几个 agent 从多角度帮你查漏。
+> 一个「skill 路由器 + 多 Agent 审计员」。**核心理念：有现成的轮子，就别从零造**——遇到任务先找现成 skill 复用，同样的活儿别人早干过，直接调用最省时、最省大模型 token（token 即大模型消耗的计量单位）；你描述任务，它告诉你用哪个 skill，本地没有就上 GitHub 搜候选；你说"审计一下"，再派几个 agent 从多角度帮你查漏。
 
 > GitHub 仓库 slug：`multi-agent-audit`（URL 仅支持 ASCII，故仓库名沿用英文，技能显示名用中文「技能罗盘」）。
 
@@ -91,7 +91,7 @@ flowchart TD
 | `gh.py` | Layer 2 GitHub 兜底搜索（纯 urllib，优雅降级） |
 | `tests/test_all.py` | 9/9 单元测试（覆盖扫描 / 打分 / 离线降级） |
 | `references/audit-prompts.md` | Layer 3 审查视角的 prompt 清单 |
-| `legacy/` | 旧 1.x CDP 注入 daemon 实现（已归档，未删） |
+| `legacy/` | 旧 1.x CDP 注入 daemon 实现（仅本地归档，发布仓库不含） |
 
 ### 模块关系图（Mermaid）
 
