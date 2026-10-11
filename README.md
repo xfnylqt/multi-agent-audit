@@ -79,8 +79,8 @@ flowchart TD
 ### Layer 2 — GitHub 兜底
 本地没命中时，抽取任务关键词、打 GitHub 公开搜索 API 按 star 排序给候选。联网失败会优雅降级为 `{"ok": false}`，绝不崩主流程。
 
-### Layer 3 — 多 Agent 审计（可选）
-你明确说"多 agent / 审计 / 一起审"时才派 2–4 个 `general-purpose` agent，从实现 / 审查 / 安全等角度分头做再交叉核对。
+### Layer 3 — 多 Agent 审计（可选 · 自适应宿主）
+你明确说"多 agent / 审计 / 一起审"时才触发。优先派 2–4 个 `general-purpose` agent 从实现 / 审查 / 安全等角度分头做再交叉核对；**若你的部署不允许嵌套 agent（沙箱终止 / 禁用），主 agent 会自动降级为分视角自审**，交付物形态完全一致——审计不会因此跳过。要不要并行多 agent，取决于宿主环境是否开放嵌套 agent，本 skill 两种都支持。
 
 ## 目录结构
 
