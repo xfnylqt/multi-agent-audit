@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>技能罗盘 · Skill 详情</title>
+<style>
+  :root{
+    --bg:#0d1117; --panel:#161b22; --panel2:#1c2230; --border:#30363d;
+    --text:#e6edf3; --muted:#8b949e; --accent:#58a6ff; --accent2:#3fb950;
+    --warn:#d29922; --chip:#21262d;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,"Segoe UI",Roboto,"PingFang SC","Microsoft YaHei",sans-serif;
+    background:var(--bg);color:var(--text);line-height:1.65;padding:32px 16px}
+  .wrap{max-width:880px;margin:0 auto}
+  .hero{background:linear-gradient(135deg,#1f2a44,#0d1117);border:1px solid var(--border);
+    border-radius:16px;padding:28px 30px;position:relative;overflow:hidden}
+  .hero::after{content:"";position:absolute;right:-40px;top:-40px;width:180px;height:180px;
+    background:radial-gradient(circle,rgba(88,166,255,.25),transparent 70%);border-radius:50%}
+  .badge{display:inline-block;font-size:12px;color:var(--accent);background:rgba(88,166,255,.1);
+    border:1px solid rgba(88,166,255,.3);padding:3px 10px;border-radius:999px;margin-bottom:14px}
+  h1{font-size:26px;font-weight:700;letter-spacing:.3px}
+  .sub{color:var(--muted);margin-top:10px;font-size:15px;max-width:640px}
+  .meta{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}
+  .meta .item{background:var(--chip);border:1px solid var(--border);border-radius:8px;
+    padding:6px 12px;font-size:13px;color:var(--muted)}
+  .meta .item b{color:var(--text)}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:24px}
+  @media(max-width:680px){.grid{grid-template-columns:1fr}}
+  .card{background:var(--panel);border:1px solid var(--border);border-radius:14px;padding:20px}
+  .card h2{font-size:16px;margin-bottom:12px;display:flex;align-items:center;gap:8px}
+  .dot{width:9px;height:9px;border-radius:50%;display:inline-block}
+  .d1{background:var(--accent2)} .d2{background:var(--accent)} .d3{background:var(--warn)}
+  ul{list-style:none;font-size:14px}
+  ul li{padding:7px 0 7px 22px;position:relative;color:#c9d1d9}
+  ul li::before{content:"▸";position:absolute;left:0;color:var(--accent)}
+  .flow{background:var(--panel2);border:1px solid var(--border);border-radius:14px;
+    padding:22px;margin-top:24px;font-family:"SFMono-Regular",Consolas,monospace;font-size:13px;
+    white-space:pre;overflow-x:auto;color:#9fd3ff;line-height:1.5}
+  table{width:100%;border-collapse:collapse;margin-top:6px;font-size:14px}
+  th,td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--border);vertical-align:top}
+  th{color:var(--muted);font-weight:600;font-size:12px;text-transform:uppercase;letter-spacing:.5px}
+  .tag{display:inline-block;font-size:12px;background:var(--chip);border:1px solid var(--border);
+    color:var(--accent);padding:2px 8px;border-radius:6px;margin:2px}
+  .sec-title{font-size:18px;font-weight:700;margin:30px 0 4px}
+  .sec-sub{color:var(--muted);font-size:14px;margin-bottom:14px}
+  .example{background:var(--panel);border-left:3px solid var(--accent);border-radius:0 10px 10px 0;
+    padding:14px 18px;margin-bottom:12px;font-size:14px}
+  .example b{color:var(--accent2)}
+  .note{background:var(--chip);border:1px dashed var(--border);border-radius:10px;padding:14px 18px;
+    font-size:13px;color:var(--muted);margin-top:14px}
+  code{background:#0b0f16;border:1px solid var(--border);border-radius:5px;padding:1px 6px;
+    font-family:Consolas,monospace;font-size:13px;color:#ffa657}
+  .banner{background:linear-gradient(135deg,rgba(210,153,34,.14),rgba(210,153,34,.04));
+    border:1px solid rgba(210,153,34,.4);border-left:4px solid var(--warn);border-radius:12px;
+    padding:16px 20px;margin-top:18px;font-size:14.5px;line-height:1.9;color:#f5e3b3}
+  .tip{background:linear-gradient(135deg,rgba(88,166,255,.12),rgba(88,166,255,.03));
+    border:1px solid rgba(88,166,255,.35);border-left:4px solid var(--accent);border-radius:12px;
+    padding:14px 20px;margin-top:20px;font-size:14px;line-height:1.85;color:#cfe6ff}
+  .tip b{color:#e6edf3}
+  .card.risk{border-top:3px solid var(--warn)} .card.safe{border-top:3px solid var(--accent2)}
+  .risk ul li::before{color:var(--warn)} .safe ul li::before{color:var(--accent2)}
+  footer{color:var(--muted);font-size:12px;text-align:center;margin-top:30px}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="hero">
+    <span class="badge">Skill · 任务编排 / 多 Agent 审计</span>
+    <h1>技能罗盘</h1>
+    <div class="sub">一个「skill 路由器 + 多 Agent 审计员」。<b style="color:#e6edf3">核心理念：有现成的轮子，就别从零造</b>——遇到任务先找现成 skill 复用，同样的活儿别人早干过，直接调用最省时、最省 token。你描述任务，它告诉你用哪个 skill；本地没有就上 GitHub 搜候选；你说"审计一下"，再派几个 agent 从多角度帮你查漏。</div>
+    <div class="meta">
+      <div class="item">版本 <b>v2.0.0</b></div>
+      <div class="item">形态 <b>纯 skill · 零依赖</b></div>
+      <div class="item">核心语言 <b>Python 标准库</b></div>
+      <div class="item">测试 <b>9 / 9 通过</b></div>
+      <div class="item">理念 <b>别重复造轮子 · 省 token</b></div>
+    </div>
+  </div>
+
+  <div class="tip">💡 <b>有现成的轮子，就别从零造。</b>AI 从零写代码 / 方案要烧掉大量 token；而直接复用别人早写好的 skill，几乎是零成本。本地命中 = 零 token，去 GitHub 找 = 一次搜索——都比硬造划算，效率也高得多。</div>
+
+  <div class="grid">
+    <div class="card">
+      <h2><span class="dot d1"></span>能做什么</h2>
+      <ul>
+        <li>断网跑 Layer 1：按关键词把任务匹配到本地已装 skill，零 token、毫秒级</li>
+        <li>本地没命中跑 Layer 2：去 GitHub 搜对口 skill 仓库，列带 star / 描述的候选</li>
+        <li>你点名"审计"时跑 Layer 3：派 2–4 个 agent 分头做、再交叉核对</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h2><span class="dot d3"></span>不做什么</h2>
+      <ul>
+        <li>不做语义级精准推荐——只做关键词级匹配</li>
+        <li>不在你没要求时自动开多 Agent；你点头它才派</li>
+        <li>不替你拍板装哪个 skill——候选列给你，挑哪个由你定</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="sec-title">为什么需要多 Agent 审计</div>
+  <div class="sec-sub">AI 不是全知全能——它会幻觉、会自信地胡说八道。一个人容易被骗，一群人互相盯着就不一样了。</div>
+  <div class="banner">🤖 AI 有时候会「骗人」：编造不存在的 API、拼错文件名、把错的当对的讲得头头是道。<br>🤝 多个 AI 从多角度交叉核对，漏判和翻车的概率大幅下降——这就是 Layer 3 存在的理由。</div>
+  <div class="grid">
+    <div class="card risk">
+      <h2><span class="dot d3"></span>单一 AI 的坑</h2>
+      <ul>
+        <li>幻觉：凭空造出不存在的库 / 接口 / 参数，还一脸理直气壮</li>
+        <li>一旦方向跑偏，整条链路都跟着错，没人拉它一把</li>
+        <li>错误被当作事实输出，你很难一眼识破</li>
+        <li>安全、边界、异常处理这类"隐性"问题最容易被漏掉</li>
+      </ul>
+    </div>
+    <div class="card safe">
+      <h2><span class="dot d1"></span>多 Agent 互审的好处</h2>
+      <ul>
+        <li>分头实现 + 互相审查，彼此抓漏、互相兜底</li>
+        <li>实现 / 审查 / 安全 多个视角并行，盲区被覆盖</li>
+        <li>多数一致才收敛，单点翻车不再"一错到底"</li>
+        <li>交付「改动 + 风险清单」，哪儿动了、有啥风险你看得见</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="sec-title">三层工作流（按需触发）</div>
+  <div class="sec-sub">永远先跑 Layer 1，没命中才上 GitHub，你点名"审计"才派 Agent。</div>
+  <div class="flow">       你描述任务
+            │
+            ▼
+      ┌──────────────┐
+      │  Layer 1      │  扫本地已装 skill，关键词匹配
+      │  本地路由     │
+      └──────┬───────┘
+             │
+       命中？├── 是 ──► 直接调命中的 skill（完）
+             │
+            否
+             ▼
+      ┌──────────────┐
+      │  Layer 2      │  GitHub 搜对口仓库，给候选
+      │  GitHub 兜底  │
+      └──────┬───────┘
+             │
+       你挑一个 ──► 安装 / 调用（完）
+             │
+       要审计？├── 是 ──► Layer 3：派 2–4 个 agent 分头做 + 互审
+             │
+            否
+             ▼
+           结束</div>
+
+  <div class="sec-title">项目示意图</div>
+  <div class="sec-sub">三层按需触发：本地路由先跑，没命中才上 GitHub，你点名"审计"才派 Agent。</div>
+  <div style="margin-top:20px;background:#0d1117;border:1px solid #30363d;border-radius:16px;padding:18px 10px">
+    <svg viewBox="0 0 680 500" width="100%" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="技能罗盘三层工作流示意图">
+      <defs>
+        <marker id="arw" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+          <path d="M2 1L8 5L2 9" fill="none" stroke="#8b949e" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </marker>
+      </defs>
+      <g>
+        <rect x="240" y="30" width="200" height="44" rx="10" fill="#161b22" stroke="#58a6ff" stroke-width="1"/>
+        <text x="340" y="52" text-anchor="middle" dominant-baseline="central" fill="#e6edf3" font-family="sans-serif" font-size="14" font-weight="500">你描述任务</text>
+      </g>
+      <g>
+        <rect x="200" y="100" width="280" height="60" rx="10" fill="#161b22" stroke="#3fb950" stroke-width="1"/>
+        <text x="340" y="120" text-anchor="middle" dominant-baseline="central" fill="#e6edf3" font-family="sans-serif" font-size="14" font-weight="500">Layer 1 · 本地路由</text>
+        <text x="340" y="142" text-anchor="middle" dominant-baseline="central" fill="#8b949e" font-family="sans-serif" font-size="12">扫本地 skill · 零 token · 毫秒级</text>
+      </g>
+      <g>
+        <path d="M260 235 L340 195 L420 235 L340 275 Z" fill="#161b22" stroke="#8b949e" stroke-width="1"/>
+        <text x="340" y="232" text-anchor="middle" dominant-baseline="central" fill="#e6edf3" font-family="sans-serif" font-size="13">本地命中?</text>
+      </g>
+      <g>
+        <rect x="60" y="210" width="180" height="44" rx="10" fill="#161b22" stroke="#3fb950" stroke-width="1"/>
+        <text x="150" y="232" text-anchor="middle" dominant-baseline="central" fill="#3fb950" font-family="sans-serif" font-size="13" font-weight="500">直接调用命中的 skill</text>
+      </g>
+      <g>
+        <rect x="190" y="310" width="300" height="60" rx="10" fill="#161b22" stroke="#58a6ff" stroke-width="1"/>
+        <text x="340" y="330" text-anchor="middle" dominant-baseline="central" fill="#e6edf3" font-family="sans-serif" font-size="14" font-weight="500">Layer 2 · GitHub 兜底</text>
+        <text x="340" y="352" text-anchor="middle" dominant-baseline="central" fill="#8b949e" font-family="sans-serif" font-size="12">抽关键词 · 搜仓库 · star 排序</text>
+      </g>
+      <g>
+        <rect x="455" y="310" width="190" height="60" rx="10" fill="#161b22" stroke="#d29922" stroke-width="1"/>
+        <text x="550" y="330" text-anchor="middle" dominant-baseline="central" fill="#e6edf3" font-family="sans-serif" font-size="14" font-weight="500">Layer 3 · 多Agent 协审</text>
+        <text x="550" y="352" text-anchor="middle" dominant-baseline="central" fill="#8b949e" font-family="sans-serif" font-size="12">派 2–4 agent 分头 + 互审</text>
+      </g>
+      <g>
+        <rect x="240" y="420" width="200" height="44" rx="10" fill="#161b22" stroke="#3fb950" stroke-width="1"/>
+        <text x="340" y="442" text-anchor="middle" dominant-baseline="central" fill="#3fb950" font-family="sans-serif" font-size="13" font-weight="500">安装 / 调用候选</text>
+      </g>
+      <g>
+        <rect x="455" y="420" width="190" height="44" rx="10" fill="#161b22" stroke="#d29922" stroke-width="1"/>
+        <text x="550" y="442" text-anchor="middle" dominant-baseline="central" fill="#d29922" font-family="sans-serif" font-size="13" font-weight="500">改动 + 风险清单</text>
+      </g>
+      <line x1="340" y1="74" x2="340" y2="100" stroke="#8b949e" stroke-width="1.5" marker-end="url(#arw)"/>
+      <line x1="340" y1="160" x2="340" y2="195" stroke="#8b949e" stroke-width="1.5" marker-end="url(#arw)"/>
+      <line x1="260" y1="235" x2="240" y2="232" stroke="#8b949e" stroke-width="1.5" marker-end="url(#arw)"/>
+      <text x="222" y="214" text-anchor="middle" fill="#8b949e" font-family="sans-serif" font-size="12">是</text>
+      <line x1="340" y1="275" x2="340" y2="310" stroke="#8b949e" stroke-width="1.5" marker-end="url(#arw)"/>
+      <text x="356" y="296" fill="#8b949e" font-family="sans-serif" font-size="12">否</text>
+      <line x1="490" y1="340" x2="455" y2="340" stroke="#8b949e" stroke-width="1.5" marker-end="url(#arw)"/>
+      <text x="472" y="324" text-anchor="middle" fill="#8b949e" font-family="sans-serif" font-size="12">要审计?</text>
+      <line x1="340" y1="370" x2="340" y2="420" stroke="#8b949e" stroke-width="1.5" marker-end="url(#arw)"/>
+      <text x="356" y="399" fill="#8b949e" font-family="sans-serif" font-size="12">你挑候选</text>
+      <line x1="550" y1="370" x2="550" y2="420" stroke="#8b949e" stroke-width="1.5" marker-end="url(#arw)"/>
+    </svg>
+  </div>
+
+  <div class="sec-title">触发词</div>
+  <div class="sec-sub">助理读取 description 后自动匹配，用户说下面任一即可唤醒。</div>
+  <div>
+    <span class="tag">找skill</span><span class="tag">有没有现成轮子</span>
+    <span class="tag">任务编排</span><span class="tag">多agent</span>
+    <span class="tag">并行审计</span><span class="tag">代码审计</span>
+    <span class="tag">避免遗漏</span>
+  </div>
+
+  <div class="sec-title">示例</div>
+  <div class="example"><b>例 1 · 本地命中</b><br>用户："我想把抖音小店的订单按渠道汇总成表"<br>→ 跑 <code>route_local.py</code> 命中 <code>ecommerce-order-puller</code>，直接调用。</div>
+  <div class="example"><b>例 2 · 去 GitHub 找</b><br>用户："有没有能自动给 PDF 加水印的 skill"<br>→ Layer 1 无命中，跑 <code>gh.py</code> 列候选，你挑一个装。</div>
+  <div class="example"><b>例 3 · 多 Agent 审计</b><br>用户："用多 agent 把这个 Flask 登录接口重写一遍并审计"<br>→ 命中 <code>webapp-e2e-hotfix</code>，派 3 个 agent（实现 / 安全 / 边界）交叉比对。</div>
+
+  <div class="sec-title">目录结构</div>
+  <table>
+    <tr><th>文件</th><th>作用</th></tr>
+    <tr><td><code>SKILL.md</code></td><td>本详情页来源：触发词、三层流程、Agent 指令</td></tr>
+    <tr><td><code>route_local.py</code></td><td>Layer 1 本地路由（CJK 2/3-gram + 拉丁标识符匹配）</td></tr>
+    <tr><td><code>gh.py</code></td><td>Layer 2 GitHub 兜底搜索（纯 urllib，优雅降级）</td></tr>
+    <tr><td><code>tests/test_all.py</code></td><td>9/9 单元测试（覆盖扫描 / 打分 / 离线降级）</td></tr>
+    <tr><td><code>legacy/</code></td><td>旧 1.x CDP 注入 daemon 实现（已归档，未删）</td></tr>
+  </table>
+
+  <div class="sec-title">模块关系图</div>
+  <div class="sec-sub">SKILL.md 是编排中枢，按场景调度两个纯标准库脚本；references 提供 Layer 3 审计视角，tests 持续守护正确性。</div>
+  <div style="margin-top:16px;background:#0d1117;border:1px solid #30363d;border-radius:16px;padding:18px 10px">
+    <svg viewBox="0 0 680 300" width="100%" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="技能罗盘模块关系图">
+      <defs>
+        <marker id="arw2" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+          <path d="M2 1L8 5L2 9" fill="none" stroke="#8b949e" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </marker>
+      </defs>
+      <g>
+        <rect x="230" y="22" width="220" height="56" rx="10" fill="#161b22" stroke="#58a6ff" stroke-width="1"/>
+        <text x="340" y="42" text-anchor="middle" dominant-baseline="central" fill="#e6edf3" font-family="sans-serif" font-size="14" font-weight="500">SKILL.md</text>
+        <text x="340" y="62" text-anchor="middle" dominant-baseline="central" fill="#8b949e" font-family="sans-serif" font-size="12">编排中枢 · 入口</text>
+      </g>
+      <g>
+        <rect x="35" y="140" width="190" height="60" rx="10" fill="#161b22" stroke="#3fb950" stroke-width="1"/>
+        <text x="130" y="162" text-anchor="middle" dominant-baseline="central" fill="#e6edf3" font-family="sans-serif" font-size="14" font-weight="500">route_local.py</text>
+        <text x="130" y="184" text-anchor="middle" dominant-baseline="central" fill="#8b949e" font-family="sans-serif" font-size="12">Layer 1 本地路由</text>
+      </g>
+      <g>
+        <rect x="245" y="140" width="190" height="60" rx="10" fill="#161b22" stroke="#58a6ff" stroke-width="1"/>
+        <text x="340" y="162" text-anchor="middle" dominant-baseline="central" fill="#e6edf3" font-family="sans-serif" font-size="14" font-weight="500">gh.py</text>
+        <text x="340" y="184" text-anchor="middle" dominant-baseline="central" fill="#8b949e" font-family="sans-serif" font-size="12">Layer 2 GitHub 兜底</text>
+      </g>
+      <g>
+        <rect x="455" y="140" width="190" height="60" rx="10" fill="#161b22" stroke="#d29922" stroke-width="1"/>
+        <text x="550" y="162" text-anchor="middle" dominant-baseline="central" fill="#e6edf3" font-family="sans-serif" font-size="14" font-weight="500">references/</text>
+        <text x="550" y="184" text-anchor="middle" dominant-baseline="central" fill="#8b949e" font-family="sans-serif" font-size="12">Layer 3 审计视角</text>
+      </g>
+      <g>
+        <rect x="220" y="236" width="240" height="48" rx="10" fill="#161b22" stroke="#3fb950" stroke-width="1"/>
+        <text x="340" y="256" text-anchor="middle" dominant-baseline="central" fill="#e6edf3" font-family="sans-serif" font-size="14" font-weight="500">tests/test_all.py</text>
+        <text x="340" y="274" text-anchor="middle" dominant-baseline="central" fill="#8b949e" font-family="sans-serif" font-size="12">9/9 守护</text>
+      </g>
+      <line x1="340" y1="78" x2="130" y2="140" stroke="#8b949e" stroke-width="1.5" marker-end="url(#arw2)"/>
+      <line x1="340" y1="78" x2="340" y2="140" stroke="#8b949e" stroke-width="1.5" marker-end="url(#arw2)"/>
+      <line x1="340" y1="78" x2="550" y2="140" stroke="#8b949e" stroke-width="1.5" marker-end="url(#arw2)"/>
+      <line x1="340" y1="200" x2="340" y2="236" stroke="#8b949e" stroke-width="1.5" stroke-dasharray="4 3" marker-end="url(#arw2)"/>
+      <text x="356" y="220" fill="#8b949e" font-family="sans-serif" font-size="12">守护</text>
+    </svg>
+  </div>
+
+  <div class="sec-title">安装 &amp; 使用</div>
+  <div class="sec-sub">把目录放进用户级 skill 目录即生效，无需 pip install；两条命令纯标准库、离线可用。</div>
+  <div class="example">
+    <b>① 安装</b><br>
+    把整个文件夹放进 <code>~/.workbuddy/skills/multi-agent-audit/</code> 即生效。<br>
+    <span style="color:#8b949e">发布到 GitHub 后可一键克隆：</span><br>
+    <code>git clone https://github.com/mcc/multi-agent-audit.git ~/.workbuddy/skills/multi-agent-audit</code>
+  </div>
+  <div class="example">
+    <b>② Layer 1 · 本地路由</b><br>
+    <code>python route_local.py "把抖音小店的订单按渠道汇总成表" --top 6</code>
+  </div>
+  <div class="example">
+    <b>③ Layer 2 · GitHub 兜底</b><br>
+    <code>python gh.py "给 PDF 加水印的 skill" --limit 6</code>
+  </div>
+
+  <div class="note">
+    <b>覆盖范围与边界：</b>Layer 1 只扫你主动管理的用户级 skill（<code>~/.workbuddy/skills/</code>）；Layer 2 是关键词级而非语义推荐；两条命令纯标准库、离线可用，GitHub 那条联网失败会返回 <code>{"ok":false}</code> 并优雅降级，绝不让主流程崩。
+  </div>
+
+  <div class="note" style="border-style:solid">
+    <b>背景：</b>最早的 1.x 是常驻 daemon，靠 CDP 注入往聊天界面塞悬浮球 + 面板，强依赖浏览器远程调试端口，白屏 / 弹窗错位 / CSP 拦截都出过。本版（2.0）砍掉全部 UI 与常驻依赖，改成纯 skill —— 不碰任何界面、不需调试端口，装上即用。
+  </div>
+
+  <footer>技能罗盘 · v2.0.0 · 纯 skill 形态 · 生成于 2026-10-11</footer>
+</div>
+</body>
+</html>
